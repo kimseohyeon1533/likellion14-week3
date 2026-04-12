@@ -199,24 +199,226 @@
 //   );
 // }
 
+// import { useState } from "react";
+
+// function App() {
+//   const [text, setText] = useState("");
+
+//   function handleChange(e) {
+//     setText(e.target.value);
+//   }
+
+//   function handleClick() {
+//     alert(text);
+//   }
+
+//   return (
+//     <div>
+//       <input type="text" onChange={handleChange} />
+//       <button onClick={handleClick}>확인</button>
+//     </div>
+//   );
+// }
+
+// export default App;
+
 import { useState } from "react";
+import styled from "styled-components";
+
+/* ================= 스타일 ================= */
+
+const AppWrapper = styled.div`
+  min-height: 100vh;
+  background-color: #f4f8fb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Container = styled.div`
+  width: 420px;
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+`;
+
+const Title = styled.h1`
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 8px;
+`;
+
+const Subtitle = styled.p`
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 14px;
+  margin-bottom: 20px;
+`;
+
+const InputBox = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+`;
+
+const Input = styled.input`
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #dcdde1;
+  border-radius: 10px;
+  outline: none;
+
+  &:focus {
+    border-color: #4caf50;
+  }
+`;
+
+const AddButton = styled.button`
+  padding: 12px 18px;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #43a047;
+  }
+`;
+
+const MemoList = styled.ul`
+  list-style: none;
+`;
+
+const MemoItem = styled.li`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9fbfc;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #eef1f4;
+`;
+
+const MemoText = styled.span`
+  cursor: pointer;
+  flex: 1;
+  color: ${(props) => (props.completed ? "#95a5a6" : "#2c3e50")};
+  text-decoration: ${(props) =>
+    props.completed ? "line-through" : "none"};
+`;
+
+const DeleteButton = styled.button`
+  border: none;
+  background-color: #ff6b6b;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-left: 10px;
+
+  &:hover {
+    background-color: #ee5253;
+  }
+`;
+
+const EmptyMessage = styled.p`
+  text-align: center;
+  color: #95a5a6;
+  margin-top: 10px;
+  font-size: 14px;
+`;
+
+/* ================= 기능 ================= */
 
 function App() {
-  const [text, setText] = useState("");
+  const [memo, setMemo] = useState("");
+  const [memoList, setMemoList] = useState([]);
 
-  function handleChange(e) {
-    setText(e.target.value);
-  }
+  const handleAddMemo = () => {
+    if (memo.trim() === "") {
+      alert("메모를 입력해주세요.");
+      return;
+    }
 
-  function handleClick() {
-    alert(text);
-  }
+    const newMemo = {
+      id: Date.now(),
+      text: memo,
+      completed: false,
+    };
+
+    setMemoList([...memoList, newMemo]);
+    setMemo("");
+  };
+
+  const handleDeleteMemo = (id) => {
+    setMemoList(memoList.filter((item) => item.id !== id));
+  };
+
+  const handleToggleComplete = (id) => {
+    setMemoList(
+      memoList.map((item) =>
+        item.id === id
+          ? { ...item, completed: !item.completed }
+          : item
+      )
+    );
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleAddMemo();
+    }
+  };
 
   return (
-    <div>
-      <input type="text" onChange={handleChange} />
-      <button onClick={handleClick}>확인</button>
-    </div>
+    <AppWrapper>
+      <Container>
+        <Title>📝 MemoList</Title>
+        <Subtitle>해야 할 일을 간단하게 정리해보세요</Subtitle>
+
+        <InputBox>
+          <Input
+            type="text"
+            placeholder="메모를 입력하세요"
+            value={memo}
+            onChange={(e) => setMemo(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          <AddButton onClick={handleAddMemo}>추가</AddButton>
+        </InputBox>
+
+        <MemoList>
+          {memoList.length === 0 ? (
+            <EmptyMessage>
+              아직 작성된 메모가 없습니다.
+            </EmptyMessage>
+          ) : (
+            memoList.map((item) => (
+              <MemoItem key={item.id}>
+                <MemoText
+                  completed={item.completed}
+                  onClick={() =>
+                    handleToggleComplete(item.id)
+                  }
+                >
+                  {item.text}
+                </MemoText>
+                <DeleteButton
+                  onClick={() =>
+                    handleDeleteMemo(item.id)
+                  }
+                >
+                  삭제
+                </DeleteButton>
+              </MemoItem>
+            ))
+          )}
+        </MemoList>
+      </Container>
+    </AppWrapper>
   );
 }
 
